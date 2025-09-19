@@ -16,6 +16,10 @@ builder.Services.AddControllers()
             System.Text.Json.Serialization.ReferenceHandler.IgnoreCycles;
     });
 
+// Register OpenAPI / Swagger services
+builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddSwaggerGen();
+
 // Register Scalar OpenAPI
 builder.Services.AddOpenApi();
 
@@ -24,8 +28,16 @@ var app = builder.Build();
 // Middleware
 if (app.Environment.IsDevelopment())
 {
-    app.MapOpenApi();            // expose OpenAPI spec
-    app.MapScalarApiReference(); // Scalar UI
+    // Swagger
+    app.UseSwagger();
+    app.UseSwaggerUI(c =>
+    {
+        c.SwaggerEndpoint("/swagger/v1/swagger.json", "School Management System API v1");
+    });
+
+    // Scalar
+    app.MapOpenApi(); // Exposes /openapi/v1.json
+    app.MapScalarApiReference();
 }
 
 app.UseHttpsRedirection();

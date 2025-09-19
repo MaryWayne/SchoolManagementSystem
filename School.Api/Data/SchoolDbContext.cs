@@ -12,27 +12,20 @@ namespace School.Api.Data
         public DbSet<Course> Courses { get; set; } = null!;
         public DbSet<Grade> Grades { get; set; } = null!;
         public DbSet<Attendance> Attendances { get; set; } = null!;
-        public DbSet<Class> Classes { get; set; } = null!;
         public DbSet<Exam> Exams { get; set; } = null!;
-        public DbSet<Parent> Parents { get; set; } = null!; // <-- Added Parent table
+        public DbSet<StudentParent> StudentParents { get; set; } = null!; 
+        public DbSet<Parent> Parents { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
 
-            // Student -> Class
-            modelBuilder.Entity<Student>()
-                .HasOne(s => s.Class)
-                .WithMany(c => c.Students)
-                .HasForeignKey(s => s.ClassId)
-                .OnDelete(DeleteBehavior.Restrict);
-
-            // Student -> Parent
-            modelBuilder.Entity<Student>()
-                .HasOne(s => s.Parent)
-                .WithMany(p => p.Students)
-                .HasForeignKey(s => s.ParentId)
-                .OnDelete(DeleteBehavior.SetNull); // Parent deletion does not delete student
+            // Student -> Parents (One-to-many)
+            modelBuilder.Entity<StudentParent>()
+                .HasOne(sp => sp.Student)
+                .WithMany(s => s.Parents)
+                .HasForeignKey(sp => sp.StudentId)
+                .OnDelete(DeleteBehavior.Cascade);
 
             // Grade -> Student
             modelBuilder.Entity<Grade>()
@@ -79,14 +72,6 @@ namespace School.Api.Data
             modelBuilder.Entity<Course>()
                 .HasIndex(c => c.Name)
                 .IsUnique();
-
-            modelBuilder.Entity<Class>()
-                .HasIndex(c => c.Name)
-                .IsUnique();
-
-            modelBuilder.Entity<Parent>()
-                .HasIndex(p => p.Email)
-                .IsUnique(); // Parent emails must be unique
         }
     }
 }
